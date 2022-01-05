@@ -56,7 +56,7 @@ defmodule Crisp do
         {acc, rest}
 
       "STRING" ->
-        build_ast(tl(rest), acc ++ hd(rest))
+        build_ast(tl(rest), acc ++ [hd(rest)])
 
       _ ->
         build_ast(rest, acc ++ [atomize(token)])
@@ -76,7 +76,6 @@ defmodule Crisp do
   def eval(str, env), do: str |> parse |> eval_ast(env)
 
   def eval_ast(ast, env) do
-    IO.inspect(ast, label: "ast")
     [token | _] = ast
 
     cond do
@@ -93,6 +92,9 @@ defmodule Crisp do
       is_integer(token) ->
         token
 
+      is_bitstring(token) ->
+        token
+
       is_float(token) ->
         token
 
@@ -101,8 +103,13 @@ defmodule Crisp do
 
         case func do
           :if ->
-            [test | [a | b]] = args
-            IO.puts("TODO IF")
+            [test | [a | [b | _]]] = args
+
+            if eval_ast([test], env) do
+              eval_ast([a], env)
+            else
+              eval_ast([b], env)
+            end
 
           :define ->
             [key | val] = args
@@ -115,30 +122,41 @@ defmodule Crisp do
             Enum.map(args, fn a -> eval_ast([a], env) end)
             |> List.last()
 
+          :exit ->
+            "SIGTERM"
+
           _ ->
             function = eval_ast([func], env)
             arguments = Enum.map(args, fn a -> eval_ast([a], env) end)
-            IO.inspect(func, label: "function")
-            IO.inspect(arguments, label: "arguments")
             apply(function, arguments)
         end
     end
   end
 
-  def main do
+  def start_env do
     envars = %{
       begin: fn x -> Enum.last(x) end,
       car: fn [h | _] -> h end,
-      cdr: fn [_ | t] -> t end
+      cdr: fn [_ | t] -> t end,
+      eq?: fn a, b -> a == b end,
+      print: fn str -> IO.puts(str) end
     }
 
     env = spawn(Crisp, :environment, [envars])
+  end
 
-    parse("(begin (define a (list 1 2 3)) (car a))")
-    |> IO.inspect()
-    |> eval_ast(env)
+  def start_repl do
+    env = start_env()
+    repl(env)
+  end
 
-    # parse("(define a 5)")
-    # "(begin (define a 5) (+ 10.4 (* 20 30) a) (print \"Hello world\"))" |> parse
+  def repl(env) do
+    result =
+      IO.gets("Crisp> ")
+      |> eval(env)
+
+    unless result == "SIGTERM" do
+      repl(env)
+    end
   end
 end
