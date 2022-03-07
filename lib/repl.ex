@@ -1,5 +1,8 @@
 defmodule Crisp.Repl do
-  def start, do: Crisp.Env.start() |> repl
+  def start do
+    {result, env} = Crisp.Env.start()
+    repl(env)
+  end
 
   def repl(env) do
     result =
@@ -7,6 +10,7 @@ defmodule Crisp.Repl do
       |> Crisp.Eval.eval(env)
 
     unless result == "SIGTERM" do
+      IO.inspect(result)
       repl(env)
     end
   end

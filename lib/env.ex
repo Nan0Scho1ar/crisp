@@ -3,7 +3,10 @@ defmodule Crisp.Env do
     car: &Crisp.Env.car/1,
     cdr: &Crisp.Env.cdr/1,
     eq?: &Crisp.Env.eq?/2,
-    print: &Crisp.Env.print/1
+    print: &Crisp.Env.print/1,
+    +: &Crisp.Env.sum/1,
+    -: &Crisp.Env.sub/1,
+    exit: &Crisp.Env.exit/1
   }
 
   def start do
@@ -40,5 +43,14 @@ defmodule Crisp.Env do
   def car([h | _]), do: h
   def cdr([_ | t]), do: t
   def eq?(a, b), do: a == b
-  def print(str), do: IO.puts(str)
+  def print([str]), do: IO.puts(str)
+  def exit(_), do: "SIGTERM"
+
+  def sum(lst, acc \\ 0)
+  def sum([h], acc), do: acc + h
+  def sum([h | t], acc), do: sum(t, acc + h)
+
+  def sub([h | t]), do: sub(t, h)
+  def sub([h], acc), do: acc - h
+  def sub([h | t], acc), do: sub(t, acc - h)
 end

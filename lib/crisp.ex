@@ -3,27 +3,34 @@ defmodule Crisp do
   Documentation for `Crisp`.
   """
 
+  @doc """
+  Run a hardcoded command
+
+  ## Example
+
+      iex> Crisp.run()
+      testing
+
+  """
   def run do
     {status, env} = Crisp.Env.start_link()
     prog = "(print \"testing\")"
     Crisp.Eval.eval(prog, env)
   end
 
-  def repl do
-    {status, env} = Crisp.Env.start_link()
-    Crisp.Repl.repl(env)
-  end
-
   @doc """
-  Hello world.
+  Start a repl
 
-  ## Examples
+  ## Example
 
-      iex> Crisp.hello()
-      :world
-
+      iex> Crisp.repl()
+      Crisp> (print "Hello world")
+      Hello World
+      Crisp> (exit)
+      nil
+      iex>
   """
-  def hello do
-    :world
+  def repl do
+    Crisp.Repl.start()
   end
 end
