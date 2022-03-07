@@ -42,22 +42,25 @@ defmodule Crisp.Eval do
     |> List.last()
   end
 
+  # Return a function which will populate the env then eval the body
   def eval_ast_func([:lambda | [params | body]], env) do
-    # Return a function which will populate the env then eval the body
     fn args ->
       {_, new_env} = Crisp.Env.start_link()
-      # Set params in env using args which will be passed in at eval time
-      for p <- params, a <- args, do: send(new_env, {:put, p, a})
+      # Set params in new_env using args which will be passed in at eval time
+      pairs = Enum.zip(params, args)
+      for {p, a} <- pairs, do: send(new_env, {:put, p, a})
 
       eval_ast([body], new_env)
     end
   end
 
   def eval_ast_func([func | args], env) do
-    # IO.inspect(func)
     function = eval_ast([func], env)
     IO.inspect(function)
+
     arguments = Enum.map(args, fn a -> eval_ast([a], env) end)
-    function.(arguments)
+    IO.inspect(arguments)
+
+    function.(arguments) |> IO.inspect()
   end
 end
