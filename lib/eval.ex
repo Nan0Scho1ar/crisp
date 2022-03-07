@@ -45,7 +45,7 @@ defmodule Crisp.Eval do
   # Return a function which will populate the env then eval the body
   def eval_ast_func([:lambda | [params | body]], env) do
     fn args ->
-      {_, new_env} = Crisp.Env.start_link()
+      {_, new_env} = Crisp.Env.clone(env)
       # Set params in new_env using args which will be passed in at eval time
       pairs = Enum.zip(params, args)
       for {p, a} <- pairs, do: send(new_env, {:put, p, a})
