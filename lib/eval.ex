@@ -49,18 +49,13 @@ defmodule Crisp.Eval do
       # Set params in new_env using args which will be passed in at eval time
       pairs = Enum.zip(params, args)
       for {p, a} <- pairs, do: send(new_env, {:put, p, a})
-
-      eval_ast([body], new_env)
+      eval_ast(body, new_env)
     end
   end
 
   def eval_ast_func([func | args], env) do
     function = eval_ast([func], env)
-    IO.inspect(function)
-
     arguments = Enum.map(args, fn a -> eval_ast([a], env) end)
-    IO.inspect(arguments)
-
-    function.(arguments) |> IO.inspect()
+    function.(arguments)
   end
 end

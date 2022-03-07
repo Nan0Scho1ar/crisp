@@ -13,8 +13,13 @@ defmodule Crisp do
 
   """
   def run do
-    {status, env} = Crisp.Env.start_link()
-    prog = "(print \"testing\")"
+    {_, env} = Crisp.Env.start_link()
+    prog = "(begin
+              (define a 10)
+              (define b 20)
+              (define add
+                (lambda (x y) (+ x y)))
+              (add a b))"
     Crisp.Eval.eval(prog, env)
   end
 
@@ -30,7 +35,7 @@ defmodule Crisp do
       nil
       iex>
   """
-  def repl do
+  def start do
     Crisp.Repl.start()
   end
 end

@@ -1,6 +1,6 @@
 defmodule Crisp.Repl do
   def start do
-    {result, env} = Crisp.Env.start()
+    {_, env} = Crisp.Env.start()
     repl(env)
   end
 
