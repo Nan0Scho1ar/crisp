@@ -7,12 +7,26 @@ defmodule Crisp.Eval do
   def eval_ast([h | _], env) when is_list(h), do: eval_ast_func(h, env)
   def eval_ast([h | _], env) when is_atom(h), do: Crisp.Env.fetch_atom(h, env)
 
+  # quote
+  # if
+  # define
+  # set!
+  # lambda
+
   def eval_ast_func([:if | [test | [a | [b | _]]]], env) do
     if eval_ast([test], env) do
       eval_ast([a], env)
     else
       eval_ast([b], env)
     end
+  end
+
+  def eval_ast_func([:quote | val], env) do
+    val
+  end
+
+  def eval_ast_func([:set! | [key | val]], env) do
+    send(env, {:put, key, eval_ast(val, env)})
   end
 
   def eval_ast_func([:define | [key | val]], env) do
@@ -28,11 +42,22 @@ defmodule Crisp.Eval do
     |> List.last()
   end
 
+  def eval_ast_func([:lambda | [params | body]], env) do
+    # Return a function which will populate the env then eval the body
+    fn args ->
+      {_, new_env} = Crisp.Env.start_link()
+      # Set params in env using args which will be passed in at eval time
+      for p <- params, a <- args, do: send(new_env, {:put, p, a})
+
+      eval_ast([body], new_env)
+    end
+  end
+
   def eval_ast_func([func | args], env) do
     # IO.inspect(func)
-    function = Crisp.Env.fetch_atom(func, env)
+    function = eval_ast([func], env)
+    IO.inspect(function)
     arguments = Enum.map(args, fn a -> eval_ast([a], env) end)
-    # IO.inspect(arguments)
     function.(arguments)
   end
 end
