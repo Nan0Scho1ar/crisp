@@ -1,12 +1,15 @@
 defmodule Crisp.Env do
   @default_envars %{
-    car: &Crisp.Env.car/1,
-    cdr: &Crisp.Env.cdr/1,
-    eq?: &Crisp.Env.eq?/2,
-    print: &Crisp.Env.print/1,
-    +: &Crisp.Env.sum/1,
-    -: &Crisp.Env.sub/1,
-    exit: &Crisp.Env.exit/1
+    car: &Crisp.Env.c_car/1,
+    cdr: &Crisp.Env.c_cdr/1,
+    eq?: &Crisp.Env.c_eq?/1,
+    print: &Crisp.Env.c_print/1,
+    +: &Crisp.Env.c_sum/1,
+    -: &Crisp.Env.c_sub/1,
+    *: &Crisp.Env.c_mul/1,
+    exit: &Crisp.Env.c_exit/1,
+    begin: &Crisp.Env.c_begin/1,
+    list: &Crisp.Env.c_list/1
   }
 
   def start do
@@ -57,27 +60,23 @@ defmodule Crisp.Env do
   #############################################################################
   #                               BEGIN Builtins                              #
   #############################################################################
-  def exit(_), do: "SIGTERM"
+  def c_exit(_), do: "SIGTERM"
   # 'car':     lambda x: x[0],
-  def car([h | _]), do: h
+  def c_car([h | _]), do: h
   # 'cdr':     lambda x: x[1:],
-  def cdr([_ | t]), do: t
+  def c_cdr([_ | t]), do: t
   # 'eq?':     op.is_,
-  def eq?(a, b), do: a == b
+  def c_eq?([a | [b | _]]), do: a == b
   # 'print':   print,
-  def print([str]), do: IO.puts(str)
-
+  def c_print([str]), do: IO.puts(str)
   # '+':op.add,
-  def sum(lst, acc \\ 0)
-  def sum([h], acc), do: acc + h
-  def sum([h | t], acc), do: sum(t, acc + h)
-
+  def c_sum(lst), do: Enum.reduce(lst, fn x, acc -> x + acc end)
   # '-':op.sub,
-  def sub([h | t]), do: sub(t, h)
-  def sub([h], acc), do: acc - h
-  def sub([h | t], acc), do: sub(t, acc - h)
+  def c_sub(lst), do: Enum.reduce(lst, fn x, acc -> x - acc end)
   # '*':op.mul,
+  def c_mul(lst), do: Enum.reduce(lst, fn x, acc -> x * acc end)
   # '/':op.truediv,
+  def c_div(lst), do: Enum.reduce(lst, fn x, acc -> x / acc end)
   # '>':op.gt,
   # '<':op.lt,
   # '>=':op.ge,
@@ -87,11 +86,13 @@ defmodule Crisp.Env do
   # 'append':  op.add,
   # 'apply':   lambda proc, args: proc(*args),
   # 'begin':   lambda *x: x[-1],
+  def c_begin(lst), do: List.last(lst)
   # 'cons':    lambda x,y: [x] + y,
   # 'expt':    pow,
   # 'equal?':  op.eq,
   # 'length':  len,
   # 'list':    lambda *x: List(x),
+  def c_list(lst), do: lst
   # 'list?':   lambda x: isinstance(x, List),
   # 'map':     map,
   # 'max':     max,

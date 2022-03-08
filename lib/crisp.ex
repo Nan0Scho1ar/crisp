@@ -1,7 +1,7 @@
 defmodule Crisp do
-  @moduledoc """
-  Documentation for `Crisp`.
-  """
+  # @moduledoc """
+  # Documentation for `Crisp`.
+  # """
 
   def run_file(fname) do
     {_, env} = Crisp.Env.start_link()
@@ -10,14 +10,14 @@ defmodule Crisp do
     Crisp.Eval.eval(prog, env)
   end
 
-  @doc """
-  Run a hardcoded command
+  # @doc """
+  # Run a hardcoded command
 
-  ## Example
+  # ## Example
 
-      iex> Crisp.run()
+  #     iex> Crisp.run()
 
-  """
+  # """
   def run do
     {_, env} = Crisp.Env.start_link()
     prog = "
@@ -33,18 +33,18 @@ defmodule Crisp do
     Crisp.Eval.eval(prog, env)
   end
 
-  @doc """
-  Start a repl
+  # @doc """
+  # Start a repl
 
-  ## Example
+  # ## Example
 
-      iex> Crisp.repl()
-      Crisp> (print "Hello world")
-      Hello World
-      Crisp> (exit)
-      nil
-      iex>
-  """
+  #     iex> Crisp.repl()
+  #     Crisp> (print "Hello world")
+  #     Hello World
+  #     Crisp> (exit)
+  #     nil
+  #     iex>
+  # """
   def start do
     Crisp.Repl.start()
   end

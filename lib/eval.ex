@@ -33,22 +33,12 @@ defmodule Crisp.Eval do
     send(env, {:put, key, eval_ast(val, env)})
   end
 
-  def eval_ast_func([:list | args], env) do
-    Enum.map(args, fn a -> eval_ast([a], env) end)
-  end
-
-  def eval_ast_func([:begin | args], env) do
-    Enum.map(args, fn a -> eval_ast([a], env) end)
-    |> List.last()
-  end
-
   # Return a function which will populate the env then eval the body
   def eval_ast_func([:lambda | [params | body]], env) do
     fn args ->
       {_, new_env} = Crisp.Env.clone(env)
       # Set params in new_env using args which will be passed in at eval time
-      pairs = Enum.zip(params, args)
-      for {p, a} <- pairs, do: send(new_env, {:put, p, a})
+      for {p, a} <- Enum.zip(params, args), do: send(new_env, {:put, p, a})
       eval_ast(body, new_env)
     end
   end
