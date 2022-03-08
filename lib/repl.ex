@@ -5,13 +5,24 @@ defmodule Crisp.Repl do
   end
 
   def repl(env) do
-    result =
-      IO.gets("Crisp> ")
-      |> Crisp.Eval.eval(env)
+    try do
+      result =
+        IO.gets("Crisp> ")
+        |> Crisp.Eval.eval(env)
 
-    unless result == "SIGTERM" do
-      IO.inspect(result)
-      repl(env)
+      if result == "SIGTERM" do
+        exit(:shutdown)
+      else
+        IO.inspect(result)
+      end
+    rescue
+      x ->
+        IO.inspect(x)
+        # catch
+        #   :exit, value ->
+        #     IO.puts("Exited with value #{inspect(value)}")
     end
+
+    repl(env)
   end
 end
