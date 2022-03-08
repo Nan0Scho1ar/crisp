@@ -9,6 +9,7 @@ defmodule Crisp.Env do
     *: &Crisp.Env.c_mul/1,
     exit: &Crisp.Env.c_exit/1,
     begin: &Crisp.Env.c_begin/1,
+    read: &Crisp.Env.c_read/1,
     list: &Crisp.Env.c_list/1
   }
 
@@ -103,4 +104,5 @@ defmodule Crisp.Env do
   # 'procedure?': callable,
   # 'round':   round,
   # 'symbol?': lambda x: isinstance(x, Symbol),
+  def c_read([h | t]), do: Crisp.Parse.parse(h) |> hd
 end
