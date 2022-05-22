@@ -7,6 +7,12 @@ defmodule Crisp.Env do
     +: &Crisp.Env.c_sum/1,
     -: &Crisp.Env.c_sub/1,
     *: &Crisp.Env.c_mul/1,
+    /: &Crisp.Env.c_div/1,
+    >: &Crisp.Env.c_gt/1,
+    <: &Crisp.Env.c_lt/1,
+    >=: &Crisp.Env.c_ge/1,
+    <=: &Crisp.Env.c_le/1,
+    ==: &Crisp.Env.c_eq/1,
     exit: &Crisp.Env.c_exit/1,
     begin: &Crisp.Env.c_begin/1,
     read: &Crisp.Env.c_read/1,
@@ -58,6 +64,12 @@ defmodule Crisp.Env do
     environment(envars)
   end
 
+  # Compare each element to the next using given function
+  def cmp(lst, func) do
+    Enum.chunk_every(lst, 2, 1, :discard)
+    |> Enum.all?(func)
+  end
+
   #############################################################################
   #                               BEGIN Builtins                              #
   #############################################################################
@@ -79,10 +91,15 @@ defmodule Crisp.Env do
   # '/':op.truediv,
   def c_div(lst), do: Enum.reduce(lst, fn x, acc -> x / acc end)
   # '>':op.gt,
+  def c_gt(lst), do: cmp(lst, fn [a, b] -> a > b end)
   # '<':op.lt,
+  def c_lt(lst), do: cmp(lst, fn [a, b] -> a < b end)
   # '>=':op.ge,
+  def c_ge(lst), do: cmp(lst, fn [a, b] -> a >= b end)
   # '<=':op.le,
+  def c_le(lst), do: cmp(lst, fn [a, b] -> a <= b end)
   # '=':op.eq,
+  def c_eq(lst), do: cmp(lst, fn [a, b] -> a == b end)
   # 'abs':     abs,
   # 'append':  op.add,
   # 'apply':   lambda proc, args: proc(*args),
@@ -104,5 +121,5 @@ defmodule Crisp.Env do
   # 'procedure?': callable,
   # 'round':   round,
   # 'symbol?': lambda x: isinstance(x, Symbol),
-  def c_read([h | t]), do: Crisp.Parse.parse(h) |> hd
+  def c_read([h | _]), do: Crisp.Parse.parse(h) |> hd
 end
